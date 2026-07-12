@@ -1,0 +1,1221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Price List CMS - Premium Custom Engine</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:"Poppins",sans-serif;
+    -webkit-tap-highlight-color: transparent;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+}
+
+body{
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background:
+    radial-gradient(circle at top left,#4f46e5 0%,transparent 40%),
+    radial-gradient(circle at bottom right,#06b6d4 0%,transparent 35%),
+    linear-gradient(135deg,#0f172a,#020617);
+    padding: 1rem 0;
+}
+
+body:not(.is-editing) {
+    user-select: none;
+    -webkit-user-select: none;
+}
+body.is-editing {
+    user-select: text;
+    -webkit-user-select: text;
+}
+
+main{
+    width: 92%;
+    max-width: 365px;
+    padding: 1.2rem;
+    border-radius: 24px;
+    background: rgba(255,255,255,.07);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,.12);
+    box-shadow:
+        0 20px 40px rgba(0,0,0,.4),
+        inset 0 1px rgba(255,255,255,.12);
+    transition: all 0.3s ease;
+}
+
+body.is-editing main {
+    border: 1px dashed rgba(56, 189, 248, 0.6);
+    box-shadow: 0 20px 40px rgba(0,0,0,.4), 0 0 15px rgba(56, 189, 248, 0.15);
+}
+
+h1{
+    text-align: center;
+    color: white;
+    font-size: 1.45rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    outline: none;
+    transition: 0.2s;
+    min-height: 1.45rem;
+}
+
+body.is-editing h1:empty::before {
+    content: "Enter title...";
+    color: rgba(255, 255, 255, 0.25);
+    pointer-events: none;
+    display: block;
+}
+
+.divider{
+    margin: 0.8rem 0 1.2rem;
+    height: 1px;
+    background: linear-gradient(to right,transparent,#ffffff44,transparent);
+}
+
+.category {
+    margin-bottom: 1.4rem; 
+    position: relative;
+    transition: opacity 0.2s ease;
+}
+
+.category:last-child {
+    margin-bottom: 0.6rem;
+}
+
+body.is-editing .cat-hidden { opacity: 0.35; }
+body.is-editing .item-hidden { opacity: 0.35; }
+
+ul{
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+li{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0.8rem;
+    transition: 0.2s;
+    border: 1px solid rgba(255,255,255,.01);
+    border-radius: 6px;
+}
+
+li:nth-child(odd) { background: rgba(255,255,255,.03); }
+li:nth-child(even) { background: rgba(255,255,255,.06); }
+
+li:first-child {
+    border-top: 1px solid rgba(255,255,255,.1);
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+}
+
+li:last-child {
+    border-bottom: 1px solid rgba(255,255,255,.1);
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
+}
+
+li:hover{
+    transform: translateY(-1px);
+    background: rgba(255,255,255,.1);
+}
+
+.product-info-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex: 1;
+}
+
+.qty-edit-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 6px;
+    padding: 1px 3px;
+    flex-shrink: 0;
+}
+
+.qty-edit-wrapper .item-qty {
+    width: 26px;
+    height: 20px;
+    background: transparent;
+    border: none;
+    color: #7dd3fc;
+    text-align: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+    outline: none;
+    -moz-appearance: textfield;
+}
+
+.qty-edit-wrapper .item-qty::-webkit-outer-spin-button,
+.qty-edit-wrapper .item-qty::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.qty-edit-wrapper .item-suffix {
+    width: 26px;
+    height: 20px;
+    background: rgba(255, 255, 255, 0.08);
+    border: none;
+    border-radius: 4px;
+    color: #ffffff;
+    text-align: center;
+    font-size: 0.72rem;
+    font-weight: 500;
+    outline: none;
+    transition: background 0.2s;
+}
+.qty-edit-wrapper .item-suffix:focus {
+    background: rgba(56, 189, 248, 0.2);
+}
+
+.reset-suffix-btn {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.35);
+    font-size: 0.85rem;
+    cursor: pointer;
+    padding: 0 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s;
+    line-height: 1;
+}
+.reset-suffix-btn:hover { color: #ef4444; }
+
+.live-qty-label {
+    color: rgba(255, 255, 255, 0.4);
+    font-weight: 500;
+    font-size: 0.85rem;
+    margin-right: 0.15rem;
+    flex-shrink: 0;
+}
+
+.qty-hidden {
+    display: none !important;
+}
+
+.product{
+    color: white;
+    font-weight: 500;
+    font-size: 0.85rem;
+    outline: none;
+    padding-right: 0.5rem;
+}
+
+.price-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.15rem;
+}
+
+.price-currency {
+    color: #7dd3fc;
+    font-weight: 700;
+    font-size: 0.9rem;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.price{
+    color: #7dd3fc;
+    font-weight: 700;
+    font-size: 0.9rem;
+    outline: none;
+    margin-right: 0.2rem;
+}
+
+h2{
+    position: relative;
+    margin: 0.6rem 0 0.4rem;
+    color: white;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.3rem;
+    outline: none;
+}
+
+.h2-title-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    flex: 1;
+}
+
+.h2-title-wrapper::before{
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: linear-gradient(135deg,#38bdf8,#818cf8);
+    box-shadow: 0 0 8px #38bdf8;
+    flex-shrink: 0;
+}
+
+.h2-title-wrapper::after{
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, rgba(255,255,255,.25), transparent);
+}
+
+.disclaimer-editable {
+    margin-top: 0.9rem;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.45);
+    font-size: 0.65rem;
+    line-height: 1.4;
+    outline: none;
+    padding: 0 0.4rem;
+    transition: 0.2s;
+    position: relative;
+}
+
+body.is-editing .disclaimer-editable:empty::before {
+    content: "Klik hier om een optionele disclaimer of info toe te voegen...";
+    color: rgba(255, 255, 255, 0.25);
+    pointer-events: none;
+    display: block;
+}
+
+.action-controls {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.toggle-btn, .delete-btn, .delete-category-btn, .move-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.toggle-btn, .move-btn {
+    padding: 2px;
+    color: rgba(255, 255, 255, 0.5);
+    transition: color 0.2s, opacity 0.2s;
+}
+.toggle-btn:hover, .move-btn:hover { color: #38bdf8; }
+.toggle-btn svg, .move-btn svg { display: block; }
+
+.move-btn.disabled {
+    opacity: 0.15;
+    pointer-events: none;
+}
+
+.delete-btn, .delete-category-btn {
+    color: #ef4444;
+    font-size: 1.2rem;
+    padding: 0 2px;
+    display: none;
+    line-height: 1;
+}
+
+.delete-category-btn { font-size: 1.1rem; }
+
+.add-item-btn {
+    display: none;
+    width: 100%;
+    background: rgba(255,255,255,0.02);
+    border: 1px dashed rgba(255,255,255,0.12);
+    color: rgba(255,255,255,0.5);
+    padding: 0.25rem;
+    border-radius: 6px;
+    margin-top: 0.35rem;
+    cursor: pointer;
+    font-size: 0.75rem;
+}
+
+.cms-controls {
+    display: none;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin-top: 0.8rem;
+    padding-top: 0.8rem;
+    border-top: 1px solid rgba(255,255,255,0.08);
+}
+
+.cms-toggle-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.75rem;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 0.45rem 0.6rem;
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 8px;
+    width: 100%;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+.cms-toggle-label input[type="checkbox"] {
+    accent-color: #38bdf8;
+    cursor: pointer;
+}
+
+.currency-config-input {
+    width: 38px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 5px;
+    color: #7dd3fc;
+    font-weight: 600;
+    text-align: center;
+    font-size: 0.75rem;
+    padding: 2px 0;
+    outline: none;
+    transition: border 0.2s;
+}
+.currency-config-input:focus {
+    border-color: #38bdf8;
+    background: rgba(255, 255, 255, 0.12);
+}
+
+body.is-editing [contenteditable="true"] {
+    border-bottom: 1px dashed rgba(56, 189, 248, 0.4);
+    padding-bottom: 1px;
+}
+body.is-editing [contenteditable="true"]:focus {
+    border-bottom: 1px solid #38bdf8;
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.cms-row { display: flex; gap: 0.4rem; }
+
+.cms-btn {
+    flex: 1;
+    background: linear-gradient(135deg, #4f46e5, #3730a3);
+    border: none;
+    color: white;
+    padding: 0.45rem;
+    border-radius: 8px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: center;
+}
+
+.cms-btn.secondary {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.08);
+}
+
+.cms-btn.share-btn { background: linear-gradient(135deg, #06b6d4, #0891b2); margin-bottom: 0.2rem; }
+.cms-btn.danger { background: linear-gradient(135deg, #dc2626, #991b1b); }
+
+body.is-editing .delete-btn, body.is-editing .delete-category-btn,
+body.is-editing .add-item-btn, body.is-editing .cms-controls { display: flex; }
+body.is-editing .add-item-btn { display: block; }
+
+#fileInput { display: none; }
+
+.hint-msg {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.25);
+    font-size: 0.62rem;
+    margin-bottom: 0.4rem;
+}
+
+.modal-overlay {
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(2, 6, 23, 0.55);
+    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+    display: none; justify-content: center; align-items: center;
+    z-index: 9999; opacity: 0; transition: opacity 0.2s ease;
+}
+.modal-overlay.active { display: flex; opacity: 1; }
+
+.modal-box {
+    width: 295px; background: rgba(15, 23, 42, 0.82);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+    border-radius: 20px; padding: 1.4rem; text-align: center;
+    transform: scale(0.94); transition: transform 0.22s cubic-bezier(0.34, 1.4, 0.64, 1);
+}
+.modal-overlay.active .modal-box { transform: scale(1); }
+.modal-title { color: white; font-size: 1.05rem; font-weight: 600; margin-bottom: 0.4rem; }
+.modal-message { color: rgba(255, 255, 255, 0.55); font-size: 0.78rem; line-height: 1.35; margin-bottom: 1.4rem; }
+.modal-actions { display: flex; justify-content: center; gap: 0.6rem; }
+.modal-btn { padding: 0.4rem 1.25rem; border-radius: 50px; font-size: 0.75rem; font-weight: 500; cursor: pointer; border: 1px solid transparent; transition: all 0.2s ease; }
+.modal-btn.cancel { background: transparent; color: rgba(255, 255, 255, 0.5); border: 1px solid rgba(255, 255, 255, 0.12); }
+.modal-btn.confirm { background: #ef4444; color: white; }
+</style>
+</head>
+
+<body>
+
+<main id="capture-area">
+    <h1 id="main-title-field">Price List</h1>
+    <div class="hint-msg">(Double-tap or Right-click to edit)</div>
+    <div class="divider"></div>
+
+    <div id="list-container"></div>
+
+    <div id="disclaimer-field" class="disclaimer-editable"></div>
+
+    <div class="cms-controls">
+        <button class="cms-btn share-btn" onclick="exportAsSocialImage()">Export Image (Custom Native Engine)</button>
+        
+        <div class="cms-row" style="margin-bottom: 0.4rem;">
+            <label class="cms-toggle-label" style="flex: 1;">
+                <input type="checkbox" id="global-qty-toggle" onchange="handleGlobalQtyToggle()">
+                <span>Aantallen inschakelen</span>
+            </label>
+            <div class="cms-toggle-label" style="flex: 0 0 115px; justify-content: space-between;">
+                <span>Valuta:</span>
+                <input type="text" id="global-currency-input" oninput="handleGlobalCurrencyChange()" max-length="5">
+            </div>
+        </div>
+
+        <div class="cms-row">
+            <button class="cms-btn" onclick="saveCMS()">Save & Close</button>
+            <button class="cms-btn secondary" onclick="addCategory()">+ Category</button>
+        </div>
+        <div class="cms-row">
+            <button class="cms-btn secondary" onclick="exportJSON()">Export (JSON)</button>
+            <button class="cms-btn secondary" onclick="document.getElementById('fileInput').click()">Import (JSON)</button>
+        </div>
+        <button class="cms-btn danger" onclick="handleCancelClick()">Discard Changes</button>
+        <input type="file" id="fileInput" accept=".json" onchange="handleImportClick(event)">
+    </div>
+</main>
+
+<div id="customConfirmModal" class="modal-overlay">
+    <div class="modal-box">
+        <div id="modalTitle" class="modal-title">Are you sure?</div>
+        <div id="modalMessage" class="modal-message">This action cannot be undone.</div>
+        <div class="modal-actions">
+            <button id="modalCancelBtn" class="modal-btn cancel">Cancel</button>
+            <button id="modalConfirmBtn" class="modal-btn confirm">Proceed</button>
+        </div>
+    </div>
+</div>
+
+<script>
+const SVG_EYE_OPEN = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>`;
+const SVG_EYE_CLOSED = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.52 13.52 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" y1="2" x2="22" y2="22"/></svg>`;
+// FIX: Strakke nieuwe SVG-pijlen voor omhoog/omlaag sorteren
+const SVG_ARROW_UP = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>`;
+const SVG_ARROW_DOWN = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>`;
+
+function cleanPriceString(p) {
+    if (typeof p === 'string') {
+        return p.replace(/[€$£¥\s]/g, '');
+    }
+    return p;
+}
+
+const defaultData = {
+    title: "Price List",
+    showQuantities: true,
+    currency: "€",
+    categories: [
+        {
+            category: "Fruit",
+            hidden: false,
+            items: [
+                { name: "Organic Apples", price: "10", hidden: false, quantity: 1, suffix: "x" },
+                { name: "Fresh Berries", price: "12", hidden: false, quantity: 1, suffix: "x" }
+            ]
+        },
+        {
+            category: "Nuts",
+            hidden: false,
+            items: [
+                { name: "Roasted Almonds", price: "14", hidden: false, quantity: 1, suffix: "x" },
+                { name: "Walnuts", price: "10", hidden: false, quantity: 1, suffix: "x" }
+            ]
+        }
+    ],
+    disclaimer: "Prices are subject to structural changes. Updates auto-encrypt to local device cache files."
+};
+
+let rawStoredData = localStorage.getItem('cmsPriceListData');
+let currentData;
+
+if (rawStoredData) {
+    try {
+        let parsed = JSON.parse(rawStoredData);
+        currentData = parsed.categories ? parsed : { title: defaultData.title, showQuantities: true, currency: "€", categories: parsed, disclaimer: defaultData.disclaimer };
+        if (!currentData.currency) currentData.currency = "€";
+        currentData.categories.forEach(c => {
+            if(c.items) c.items.forEach(i => i.price = cleanPriceString(i.price));
+        });
+    } catch(e) {
+        currentData = defaultData;
+    }
+} else {
+    currentData = defaultData;
+}
+
+let isEditing = false;
+
+function renderList() {
+    const hintMsg = document.querySelector('.hint-msg');
+    if (hintMsg) hintMsg.style.display = isEditing ? 'none' : 'block';
+
+    const titleField = document.getElementById('main-title-field');
+    titleField.innerText = currentData.title || "";
+    titleField.contentEditable = isEditing;
+
+    const globalQtyToggle = document.getElementById('global-qty-toggle');
+    if (globalQtyToggle) globalQtyToggle.checked = currentData.showQuantities !== false;
+
+    const globalCurrencyInput = document.getElementById('global-currency-input');
+    if (globalCurrencyInput) {
+        globalCurrencyInput.className = 'currency-config-input';
+        globalCurrencyInput.value = currentData.currency || '€';
+    }
+
+    const container = document.getElementById('list-container');
+    container.innerHTML = '';
+
+    currentData.categories.forEach((cat, catIdx) => {
+        if (!isEditing && cat.hidden) return;
+
+        const catDiv = document.createElement('div');
+        catDiv.className = 'category';
+        if (cat.hidden) catDiv.classList.add('cat-hidden');
+        
+        const h2 = document.createElement('h2');
+        const titleWrapper = document.createElement('div');
+        titleWrapper.className = 'h2-title-wrapper';
+        
+        const titleSpan = document.createElement('span');
+        titleSpan.className = 'category-title';
+        titleSpan.innerText = cat.category;
+        titleSpan.contentEditable = isEditing;
+        titleWrapper.appendChild(titleSpan);
+        h2.appendChild(titleWrapper);
+
+        if (isEditing) {
+            const actionControls = document.createElement('div');
+            actionControls.className = 'action-controls';
+
+            // FIX: Categorie omhoog verplaatsen
+            const moveUpCatBtn = document.createElement('button');
+            moveUpCatBtn.className = 'move-btn' + (catIdx === 0 ? ' disabled' : '');
+            moveUpCatBtn.innerHTML = SVG_ARROW_UP;
+            moveUpCatBtn.onclick = () => moveCategory(catIdx, -1);
+
+            // FIX: Categorie omlaag verplaatsen
+            const moveDownCatBtn = document.createElement('button');
+            moveDownCatBtn.className = 'move-btn' + (catIdx === currentData.categories.length - 1 ? ' disabled' : '');
+            moveDownCatBtn.innerHTML = SVG_ARROW_DOWN;
+            moveDownCatBtn.onclick = () => moveCategory(catIdx, 1);
+
+            const toggleBtn = document.createElement('button');
+            toggleBtn.className = 'toggle-btn';
+            toggleBtn.innerHTML = cat.hidden ? SVG_EYE_CLOSED : SVG_EYE_OPEN;
+            toggleBtn.onclick = () => {
+                currentData = scrapeDOM();
+                currentData.categories[catIdx].hidden = !currentData.categories[catIdx].hidden;
+                renderList();
+            };
+
+            const delCatBtn = document.createElement('button');
+            delCatBtn.className = 'delete-category-btn';
+            delCatBtn.innerHTML = '&times;';
+            delCatBtn.onclick = () => handleDeleteCategoryClick(catIdx);
+            
+            actionControls.appendChild(moveUpCatBtn);
+            actionControls.appendChild(moveDownCatBtn);
+            actionControls.appendChild(toggleBtn);
+            actionControls.appendChild(delCatBtn);
+            h2.appendChild(actionControls);
+        }
+        catDiv.appendChild(h2);
+
+        const ul = document.createElement('ul');
+        cat.items.forEach((item, itemIdx) => {
+            if (!isEditing && item.hidden) return;
+
+            const li = document.createElement('li');
+            if (item.hidden) li.classList.add('item-hidden');
+            
+            const infoWrapper = document.createElement('div');
+            infoWrapper.className = 'product-info-wrapper';
+
+            const showQty = currentData.showQuantities !== false;
+
+            if (isEditing) {
+                const qtyWrapper = document.createElement('div');
+                qtyWrapper.className = 'qty-edit-wrapper';
+                if (!showQty) qtyWrapper.classList.add('qty-hidden');
+
+                const qtyInput = document.createElement('input');
+                qtyInput.type = 'number';
+                qtyInput.className = 'item-qty';
+                qtyInput.min = '1';
+                qtyInput.value = item.quantity || 1;
+
+                const suffixInput = document.createElement('input');
+                suffixInput.type = 'text';
+                suffixInput.className = 'item-suffix';
+                suffixInput.value = item.suffix || 'x';
+                suffixInput.maxLength = 4;
+
+                const resetBtn = document.createElement('button');
+                resetBtn.className = 'reset-suffix-btn';
+                resetBtn.innerHTML = '↺';
+                resetBtn.onclick = (e) => {
+                    e.preventDefault();
+                    suffixInput.value = 'x';
+                };
+
+                qtyWrapper.appendChild(qtyInput);
+                qtyWrapper.appendChild(suffixInput);
+                qtyWrapper.appendChild(resetBtn);
+                infoWrapper.appendChild(qtyWrapper);
+            } else {
+                const qtySpan = document.createElement('span');
+                qtySpan.className = 'live-qty-label';
+                if (!showQty) qtySpan.classList.add('qty-hidden');
+                qtySpan.innerText = `${item.quantity || 1}${item.suffix || 'x'} `;
+                infoWrapper.appendChild(qtySpan);
+            }
+
+            const nameSpan = document.createElement('span');
+            nameSpan.className = 'product';
+            nameSpan.innerText = item.name;
+            nameSpan.contentEditable = isEditing;
+            infoWrapper.appendChild(nameSpan);
+
+            const priceWrapper = document.createElement('div');
+            priceWrapper.className = 'price-wrapper';
+
+            const currencySpan = document.createElement('span');
+            currencySpan.className = 'price-currency';
+            currencySpan.innerText = currentData.currency || '€';
+            priceWrapper.appendChild(currencySpan);
+
+            const priceSpan = document.createElement('span');
+            priceSpan.className = 'price';
+            priceSpan.innerText = item.price;
+            priceSpan.contentEditable = isEditing;
+            priceWrapper.appendChild(priceSpan);
+
+            if (isEditing) {
+                // FIX: Product omhoog verplaatsen
+                const moveUpBtn = document.createElement('button');
+                moveUpBtn.className = 'move-btn' + (itemIdx === 0 ? ' disabled' : '');
+                moveUpBtn.innerHTML = SVG_ARROW_UP;
+                moveUpBtn.onclick = () => moveItem(catIdx, itemIdx, -1);
+
+                // FIX: Product omlaag verplaatsen
+                const moveDownBtn = document.createElement('button');
+                moveDownBtn.className = 'move-btn' + (itemIdx === cat.items.length - 1 ? ' disabled' : '');
+                moveDownBtn.innerHTML = SVG_ARROW_DOWN;
+                moveDownBtn.onclick = () => moveItem(catIdx, itemIdx, 1);
+
+                const toggleItemBtn = document.createElement('button');
+                toggleItemBtn.className = 'toggle-btn';
+                toggleItemBtn.innerHTML = item.hidden ? SVG_EYE_CLOSED : SVG_EYE_OPEN;
+                toggleItemBtn.onclick = () => {
+                    currentData = scrapeDOM();
+                    currentData.categories[catIdx].items[itemIdx].hidden = !currentData.categories[catIdx].items[itemIdx].hidden;
+                    renderList();
+                };
+
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'delete-btn';
+                deleteBtn.innerHTML = '&times;';
+                deleteBtn.onclick = () => handleDeleteItemClick(catIdx, itemIdx);
+                
+                priceWrapper.appendChild(moveUpBtn);
+                priceWrapper.appendChild(moveDownBtn);
+                priceWrapper.appendChild(toggleItemBtn);
+                priceWrapper.appendChild(deleteBtn);
+            }
+            
+            li.appendChild(infoWrapper);
+            li.appendChild(priceWrapper);
+            ul.appendChild(li);
+        });
+        catDiv.appendChild(ul);
+
+        const addBtn = document.createElement('button');
+        addBtn.className = 'add-item-btn';
+        addBtn.innerText = '+ Add Item';
+        addBtn.onclick = () => addItem(catIdx);
+        catDiv.appendChild(addBtn);
+
+        container.appendChild(catDiv);
+    });
+
+    const disclaimerField = document.getElementById('disclaimer-field');
+    disclaimerField.innerText = currentData.disclaimer || "";
+    disclaimerField.contentEditable = isEditing;
+}
+
+// FIX: Engine logica om categorieën te swappen
+function moveCategory(catIdx, direction) {
+    currentData = scrapeDOM();
+    const targetIdx = catIdx + direction;
+    if (targetIdx >= 0 && targetIdx < currentData.categories.length) {
+        const temp = currentData.categories[catIdx];
+        currentData.categories[catIdx] = currentData.categories[targetIdx];
+        currentData.categories[targetIdx] = temp;
+        renderList();
+    }
+}
+
+// FIX: Engine logica om individuele items te swappen binnen hun categorie
+function moveItem(catIdx, itemIdx, direction) {
+    currentData = scrapeDOM();
+    const items = currentData.categories[catIdx].items;
+    const targetIdx = itemIdx + direction;
+    if (targetIdx >= 0 && targetIdx < items.length) {
+        const temp = items[itemIdx];
+        items[itemIdx] = items[targetIdx];
+        items[targetIdx] = temp;
+        renderList();
+    }
+}
+
+function handleGlobalQtyToggle() {
+    currentData = scrapeDOM();
+    renderList();
+}
+
+function handleGlobalCurrencyChange() {
+    const inputVal = document.getElementById('global-currency-input').value;
+    document.querySelectorAll('.price-currency').forEach(el => {
+        el.innerText = inputVal;
+    });
+}
+
+function toggleEditMode(forceState) {
+    isEditing = forceState !== undefined ? forceState : !isEditing;
+    if (isEditing) {
+        document.body.classList.add('is-editing');
+    } else {
+        document.body.classList.remove('is-editing');
+        const freshData = JSON.parse(localStorage.getItem('cmsPriceListData'));
+        if(freshData) currentData = freshData;
+    }
+    renderList();
+}
+
+document.addEventListener('dblclick', () => { if(!isEditing) toggleEditMode(true); });
+document.addEventListener('contextmenu', (e) => { e.preventDefault(); if(!isEditing) toggleEditMode(true); });
+
+function scrapeDOM() {
+    const scrapedCategories = [];
+    const globalQtyToggle = document.getElementById('global-qty-toggle');
+    const globalCurrencyInput = document.getElementById('global-currency-input');
+    
+    const showQuantities = globalQtyToggle ? globalQtyToggle.checked : (currentData.showQuantities !== false);
+    const currency = globalCurrencyInput ? globalCurrencyInput.value : (currentData.currency || '€');
+
+    document.querySelectorAll('.category').forEach(catEl => {
+        const titleEl = catEl.querySelector('.category-title');
+        const categoryName = titleEl ? titleEl.innerText.trim() : '';
+        const isCatHidden = catEl.classList.contains('cat-hidden');
+        const items = [];
+        
+        catEl.querySelectorAll('ul li').forEach(liEl => {
+            const name = liEl.querySelector('.product').innerText.trim();
+            const rawPrice = liEl.querySelector('.price').innerText.trim();
+            const price = cleanPriceString(rawPrice);
+            
+            let quantity = 1;
+            let suffix = 'x';
+
+            const qtyEdit = liEl.querySelector('.qty-edit-wrapper');
+            const qtyLive = liEl.querySelector('.live-qty-label');
+
+            if (qtyEdit) {
+                quantity = parseInt(qtyEdit.querySelector('.item-qty').value) || 1;
+                suffix = qtyEdit.querySelector('.item-suffix').value || 'x';
+            } else if (qtyLive) {
+                const text = qtyLive.innerText.trim();
+                const num = parseInt(text);
+                quantity = isNaN(num) ? 1 : num;
+                suffix = text.replace(quantity.toString(), '') || 'x';
+            }
+
+            const isItemHidden = liEl.classList.contains('item-hidden');
+            if(name || price) items.push({ name, price, hidden: isItemHidden, quantity, suffix });
+        });
+        if(categoryName || items.length > 0) {
+            scrapedCategories.push({ category: categoryName, items, hidden: isCatHidden });
+        }
+    });
+
+    return {
+        title: document.getElementById('main-title-field').innerText.trim(),
+        showQuantities: showQuantities,
+        currency: currency,
+        categories: scrapedCategories,
+        disclaimer: document.getElementById('disclaimer-field').innerText.trim()
+    };
+}
+
+function saveCMS() {
+    currentData = scrapeDOM();
+    localStorage.setItem('cmsPriceListData', JSON.stringify(currentData));
+    toggleEditMode(false);
+}
+
+function addItem(catIdx) {
+    currentData = scrapeDOM();
+    currentData.categories[catIdx].items.push({ name: "New Item", price: "0", hidden: false, quantity: 1, suffix: "x" });
+    renderList();
+}
+
+function addCategory() {
+    currentData = scrapeDOM();
+    currentData.categories.push({ category: "NEW CATEGORY", hidden: false, items: [{ name: "Item", price: "0", hidden: false, quantity: 1, suffix: "x" }] });
+    renderList();
+}
+
+function getWrappedLines(ctx, text, maxWidth) {
+    const words = text.split(" ");
+    const lines = [];
+    let currentLine = words[0] || "";
+
+    for (let i = 1; i < words.length; i++) {
+        let word = words[i];
+        let width = ctx.measureText(currentLine + " " + word).width;
+        if (width < maxWidth) {
+            currentLine += " " + word;
+        } else {
+            lines.push(currentLine);
+            currentLine = word;
+        }
+    }
+    if(currentLine) lines.push(currentLine);
+    return lines;
+}
+
+async function exportAsSocialImage() {
+    const wasEditing = isEditing;
+    if (isEditing) toggleEditMode(false);
+    
+    await document.fonts.ready;
+    const data = scrapeDOM();
+
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+
+    const w = 1080;
+    const h = 1920;
+    canvas.width = w;
+    canvas.height = h;
+
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+
+    let bgGrad = ctx.createLinearGradient(0, 0, w, h);
+    bgGrad.addColorStop(0, '#0f172a');
+    bgGrad.addColorStop(1, '#020617');
+    ctx.fillStyle = bgGrad;
+    ctx.fillRect(0, 0, w, h);
+
+    let purpleRadial = ctx.createRadialGradient(0, 0, 0, 0, 0, w * 0.95);
+    purpleRadial.addColorStop(0, 'rgba(79, 70, 229, 0.35)');
+    purpleRadial.addColorStop(1, 'rgba(79, 70, 229, 0)');
+    ctx.fillStyle = purpleRadial;
+    ctx.fillRect(0, 0, w, h);
+
+    let cyanRadial = ctx.createRadialGradient(w, h, 0, w, h, w * 0.85);
+    cyanRadial.addColorStop(0, 'rgba(6, 182, 212, 0.28)');
+    cyanRadial.addColorStop(1, 'rgba(6, 182, 212, 0)');
+    ctx.fillStyle = cyanRadial;
+    ctx.fillRect(0, 0, w, h);
+
+    const cardW = 900;
+    const cardX = (w - cardW) / 2;
+    const padding = 55;
+    
+    let contentHeight = 0;
+    contentHeight += 90; 
+    contentHeight += 50; 
+
+    data.categories.forEach(cat => {
+        if (cat.hidden) return; 
+        const visibleItems = cat.items.filter(item => !item.hidden);
+        if (visibleItems.length === 0) return; 
+
+        contentHeight += 85; 
+        contentHeight += (visibleItems.length * 80); 
+        contentHeight += 65; 
+    });
+
+    ctx.font = "300 24px Poppins";
+    const disclaimerLines = getWrappedLines(ctx, data.disclaimer, cardW - (padding * 2));
+    if(data.disclaimer) {
+        contentHeight += 40; 
+        contentHeight += (disclaimerLines.length * 36);
+    }
+
+    const cardH = contentHeight + (padding * 2);
+    const cardY = (h - cardH) / 2; 
+
+    ctx.save();
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+    ctx.shadowBlur = 60;
+    ctx.shadowOffsetY = 25;
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.08)'; 
+    ctx.beginPath();
+    ctx.roundRect(cardX, cardY, cardW, cardH, 48); 
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.14)';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.restore();
+
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "700 52px Poppins";
+    ctx.textAlign = "center";
+    ctx.fillText(data.title || "Price List", w / 2, cardY + padding + 50);
+
+    let divY = cardY + padding + 100;
+    let divGrad = ctx.createLinearGradient(cardX + 100, 0, cardX + cardW - 100, 0);
+    divGrad.addColorStop(0, 'rgba(255,255,255,0)');
+    divGrad.addColorStop(0.5, 'rgba(255,255,255,0.22)');
+    divGrad.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = divGrad;
+    ctx.fillRect(cardX + 40, divY, cardW - 80, 2);
+
+    let currentY = divY + 65;
+
+    data.categories.forEach(cat => {
+        if (cat.hidden) return; 
+        const visibleItems = cat.items.filter(item => !item.hidden);
+        if (visibleItems.length === 0) return; 
+
+        ctx.save();
+        let dotX = cardX + padding + 10;
+        let dotY = currentY - 12;
+        ctx.shadowColor = '#38bdf8';
+        ctx.shadowBlur = 12;
+        let dotGrad = ctx.createLinearGradient(dotX - 8, dotY - 8, dotX + 8, dotY + 8);
+        dotGrad.addColorStop(0, '#38bdf8');
+        dotGrad.addColorStop(1, '#818cf8');
+        ctx.fillStyle = dotGrad;
+        ctx.beginPath();
+        ctx.arc(dotX, dotY, 8, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "700 30px Poppins";
+        ctx.textAlign = "left";
+        ctx.fillText(cat.category.toUpperCase(), dotX + 25, currentY);
+
+        let textWidth = ctx.measureText(cat.category.toUpperCase()).width;
+        let lineX = dotX + 25 + textWidth + 20;
+        let lineW = (cardX + cardW - padding) - lineX;
+        if (lineW > 10) {
+            let h2LineGrad = ctx.createLinearGradient(lineX, 0, lineX + lineW, 0);
+            h2LineGrad.addColorStop(0, 'rgba(255,255,255,0.25)');
+            h2LineGrad.addColorStop(1, 'rgba(255,255,255,0)');
+            ctx.fillStyle = h2LineGrad;
+            ctx.fillRect(lineX, currentY - 14, lineW, 2);
+        }
+
+        currentY += 45;
+
+        visibleItems.forEach((item, idx) => {
+            const rowX = cardX + padding;
+            const rowW = cardW - (padding * 2);
+            const rowH = 64;
+            const rowY = currentY;
+
+            let r = 12; 
+            let radii = [r, r, r, r]; 
+            
+            if (visibleItems.length === 1) {
+                radii = [24, 24, 24, 24];
+            } else if (idx === 0) {
+                radii = [24, 24, r, r];
+            } else if (idx === visibleItems.length - 1) {
+                radii = [r, r, 24, 24];
+            }
+
+            ctx.fillStyle = (idx % 2 === 0) ? 'rgba(255, 255, 255, 0.03)' : 'rgba(255, 255, 255, 0.06)';
+            ctx.beginPath();
+            ctx.roundRect(rowX, rowY, rowW, rowH, radii);
+            ctx.fill();
+
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+
+            let qtyWidth = 0;
+            if (data.showQuantities !== false) {
+                const displayQty = (item.quantity !== undefined ? item.quantity : 1) + (item.suffix || "x") + " ";
+                ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
+                ctx.font = "400 28px Poppins";
+                ctx.textAlign = "left";
+                ctx.fillText(displayQty, rowX + 25, rowY + (rowH / 2) + 10);
+                qtyWidth = ctx.measureText(displayQty).width;
+            }
+
+            ctx.fillStyle = "#ffffff";
+            ctx.font = "500 28px Poppins";
+            ctx.textAlign = "left";
+            ctx.fillText(item.name, rowX + 25 + qtyWidth, rowY + (rowH / 2) + 10);
+
+            const formattedPrice = (data.currency || '€') + (item.price || '0');
+            ctx.fillStyle = "#7dd3fc";
+            ctx.font = "700 30px Poppins";
+            ctx.textAlign = "right";
+            ctx.fillText(formattedPrice, rowX + rowW - 25, rowY + (rowH / 2) + 10);
+
+            currentY += rowH + 8; 
+        });
+
+        currentY += 40; 
+    });
+
+    if(data.disclaimer) {
+        currentY += 15;
+        ctx.fillStyle = "rgba(255, 255, 255, 0.45)";
+        ctx.font = "300 24px Poppins";
+        ctx.textAlign = "center";
+        
+        disclaimerLines.forEach(line => {
+            ctx.fillText(line, w / 2, currentY);
+            currentY += 36;
+        });
+    }
+
+    const link = document.createElement('a');
+    link.download = 'price-list-premium-social.png';
+    link.href = canvas.toDataURL('image/png', 1.0);
+    link.click();
+    link.remove();
+
+    if (wasEditing) toggleEditMode(true);
+}
+
+function openCustomConfirm({ title, message, onConfirm }) {
+    const modal = document.getElementById('customConfirmModal');
+    document.getElementById('modalTitle').innerText = title;
+    document.getElementById('modalMessage').innerText = message;
+    
+    modal.style.display = 'flex';
+    setTimeout(() => modal.classList.add('active'), 10);
+
+    const close = () => {
+        modal.classList.remove('active');
+        setTimeout(() => modal.style.display = 'none', 200);
+    };
+
+    document.getElementById('modalConfirmBtn').onclick = () => { onConfirm(); close(); };
+    document.getElementById('modalCancelBtn').onclick = () => { close(); };
+}
+
+function handleDeleteCategoryClick(catIdx) {
+    currentData = scrapeDOM();
+    const catName = currentData.categories[catIdx].category || "this category";
+    openCustomConfirm({
+        title: "Delete Category?",
+        message: `Are you sure you want to completely remove "${catName}" and its items?`,
+        onConfirm: () => { currentData.categories.splice(catIdx, 1); renderList(); }
+    });
+}
+
+function handleDeleteItemClick(catIdx, itemIdx) {
+    currentData = scrapeDOM();
+    const itemName = currentData.categories[catIdx].items[itemIdx].name || "this item";
+    openCustomConfirm({
+        title: "Delete Item?",
+        message: `Remove "${itemName}" from the listings?`,
+        onConfirm: () => { currentData.categories[catIdx].items.splice(itemIdx, 1); renderList(); }
+    });
+}
+
+function handleCancelClick() {
+    openCustomConfirm({
+        title: "Discard Changes?",
+        message: "Are you sure you want to exit? Your unsaved updates will be lost.",
+        onConfirm: () => { toggleEditMode(false); }
+    });
+}
+
+function handleImportClick(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    openCustomConfirm({
+        title: "Overwrite Active Data?",
+        message: "Importing this JSON will completely overwrite your local storage cache profiles.",
+        onConfirm: () => {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const parsedData = JSON.parse(e.target.result);
+                    if (parsedData && (parsedData.categories || Array.isArray(parsedData))) {
+                        currentData = Array.isArray(parsedData) ? { title: defaultData.title, showQuantities: true, currency: "€", categories: parsedData, disclaimer: defaultData.disclaimer } : parsedData;
+                        
+                        if(!currentData.currency) currentData.currency = "€";
+                        currentData.categories.forEach(c => {
+                            if(c.items) c.items.forEach(i => i.price = cleanPriceString(i.price));
+                        });
+
+                        localStorage.setItem('cmsPriceListData', JSON.stringify(currentData));
+                        renderList();
+                    } else {
+                        alert("Invalid file format mapping structure.");
+                    }
+                } catch (err) {
+                    alert("Failure parsing target document file profile.");
+                }
+            };
+            reader.readAsText(file);
+        }
+    });
+    event.target.value = ''; 
+}
+
+function exportJSON() {
+    const dataToExport = scrapeDOM();
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataToExport, null, 2));
+    const downloadAnchor = document.createElement('a');
+    downloadAnchor.setAttribute("href", dataStr);
+    downloadAnchor.setAttribute("download", "price-list.json");
+    document.body.appendChild(downloadAnchor);
+    downloadAnchor.click();
+    downloadAnchor.remove();
+}
+
+renderList();
+</script>
+
+</body>
+</html>
