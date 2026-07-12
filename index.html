@@ -536,8 +536,8 @@ function cleanPriceString(p) {
 }
 
 const defaultData = {
-    title: "Price List",
-    showQuantities: true,
+    title: "Prijslijst",
+    showQuantities: false,
     currency: "€",
     categories: [
         {
@@ -557,7 +557,7 @@ const defaultData = {
             ]
         }
     ],
-    disclaimer: "Prices are subject to structural changes. Updates auto-encrypt to local device cache files."
+    disclaimer: ""
 };
 
 let rawStoredData = localStorage.getItem('cmsPriceListData');
