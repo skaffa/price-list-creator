@@ -485,7 +485,7 @@ body.is-editing .add-item-btn { display: block; }
     <div id="disclaimer-field" class="disclaimer-editable"></div>
 
     <div class="cms-controls">
-        <button class="cms-btn share-btn" onclick="exportAsSocialImage()">Export Image (Custom Native Engine)</button>
+        <button class="cms-btn share-btn" onclick="exportAsSocialImage()">Export Image</button>
         
         <div class="cms-row" style="margin-bottom: 0.4rem;">
             <label class="cms-toggle-label" style="flex: 1;">
@@ -525,7 +525,6 @@ body.is-editing .add-item-btn { display: block; }
 <script>
 const SVG_EYE_OPEN = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>`;
 const SVG_EYE_CLOSED = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.52 13.52 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" y1="2" x2="22" y2="22"/></svg>`;
-// FIX: Strakke nieuwe SVG-pijlen voor omhoog/omlaag sorteren
 const SVG_ARROW_UP = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m18 15-6-6-6 6"/></svg>`;
 const SVG_ARROW_DOWN = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>`;
 
@@ -623,13 +622,11 @@ function renderList() {
             const actionControls = document.createElement('div');
             actionControls.className = 'action-controls';
 
-            // FIX: Categorie omhoog verplaatsen
             const moveUpCatBtn = document.createElement('button');
             moveUpCatBtn.className = 'move-btn' + (catIdx === 0 ? ' disabled' : '');
             moveUpCatBtn.innerHTML = SVG_ARROW_UP;
             moveUpCatBtn.onclick = () => moveCategory(catIdx, -1);
 
-            // FIX: Categorie omlaag verplaatsen
             const moveDownCatBtn = document.createElement('button');
             moveDownCatBtn.className = 'move-btn' + (catIdx === currentData.categories.length - 1 ? ' disabled' : '');
             moveDownCatBtn.innerHTML = SVG_ARROW_DOWN;
@@ -727,13 +724,11 @@ function renderList() {
             priceWrapper.appendChild(priceSpan);
 
             if (isEditing) {
-                // FIX: Product omhoog verplaatsen
                 const moveUpBtn = document.createElement('button');
                 moveUpBtn.className = 'move-btn' + (itemIdx === 0 ? ' disabled' : '');
                 moveUpBtn.innerHTML = SVG_ARROW_UP;
                 moveUpBtn.onclick = () => moveItem(catIdx, itemIdx, -1);
 
-                // FIX: Product omlaag verplaatsen
                 const moveDownBtn = document.createElement('button');
                 moveDownBtn.className = 'move-btn' + (itemIdx === cat.items.length - 1 ? ' disabled' : '');
                 moveDownBtn.innerHTML = SVG_ARROW_DOWN;
@@ -779,7 +774,6 @@ function renderList() {
     disclaimerField.contentEditable = isEditing;
 }
 
-// FIX: Engine logica om categorieën te swappen
 function moveCategory(catIdx, direction) {
     currentData = scrapeDOM();
     const targetIdx = catIdx + direction;
@@ -791,7 +785,6 @@ function moveCategory(catIdx, direction) {
     }
 }
 
-// FIX: Engine logica om individuele items te swappen binnen hun categorie
 function moveItem(catIdx, itemIdx, direction) {
     currentData = scrapeDOM();
     const items = currentData.categories[catIdx].items;
@@ -918,6 +911,45 @@ function getWrappedLines(ctx, text, maxWidth) {
     }
     if(currentLine) lines.push(currentLine);
     return lines;
+}
+
+// FIX: iOS Native Safe Image Overlay Engine
+function displayiOSImageOverlay(base64Data) {
+    const overlay = document.createElement('div');
+    overlay.style.position = 'fixed';
+    overlay.style.top = '0'; overlay.style.left = '0';
+    overlay.style.width = '100vw'; overlay.style.height = '100vh';
+    overlay.style.backgroundColor = 'rgba(2, 6, 23, 0.92)';
+    overlay.style.backdropFilter = 'blur(15px)'; overlay.style.webkitBackdropFilter = 'blur(15px)';
+    overlay.style.display = 'flex'; overlay.style.flexDirection = 'column';
+    overlay.style.justifyContent = 'center'; overlay.style.alignItems = 'center';
+    overlay.style.zIndex = '999999'; overlay.style.padding = '20px';
+
+    const infoText = document.createElement('p');
+    infoText.innerText = 'Houd de afbeelding ingedrukt om op te slaan';
+    infoText.style.color = '#ffffff'; infoText.style.fontSize = '0.85rem';
+    infoText.style.fontWeight = '500'; infoText.style.marginBottom = '15px';
+    infoText.style.textAlign = 'center';
+
+    const img = document.createElement('img');
+    img.src = base64Data;
+    img.style.maxWidth = '90%'; img.style.maxHeight = '72vh';
+    img.style.borderRadius = '20px';
+    img.style.boxShadow = '0 25px 50px -12px rgba(0, 0, 0, 0.7)';
+
+    const closeBtn = document.createElement('button');
+    closeBtn.innerText = 'Sluiten';
+    closeBtn.style.marginTop = '25px'; closeBtn.style.padding = '10px 30px';
+    closeBtn.style.borderRadius = '50px'; closeBtn.style.border = 'none';
+    closeBtn.style.background = 'linear-gradient(135deg, #4f46e5, #3730a3)';
+    closeBtn.style.color = 'white'; closeBtn.style.fontWeight = '600';
+    closeBtn.style.fontSize = '0.8rem'; closeBtn.style.cursor = 'pointer';
+    closeBtn.onclick = () => overlay.remove();
+
+    overlay.appendChild(infoText);
+    overlay.appendChild(img);
+    overlay.appendChild(closeBtn);
+    document.body.appendChild(overlay);
 }
 
 async function exportAsSocialImage() {
@@ -1114,11 +1146,22 @@ async function exportAsSocialImage() {
         });
     }
 
-    const link = document.createElement('a');
-    link.download = 'price-list-premium-social.png';
-    link.href = canvas.toDataURL('image/png', 1.0);
-    link.click();
-    link.remove();
+    const outputImgBase64 = canvas.toDataURL('image/png', 1.0);
+
+    // FIX: Gedragscontrole voor iOS Safari ontwijking
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+    if (isIOS) {
+        // Toon de interactieve iOS pop-up overlay
+        displayiOSImageOverlay(outputImgBase64);
+    } else {
+        // Directe onzichtbare klik methode (werkt feilloos op Windows/Android/Mac Firefox/Chrome)
+        const link = document.createElement('a');
+        link.download = 'price-list-premium-social.png';
+        link.href = outputImgBase64;
+        link.click();
+        link.remove();
+    }
 
     if (wasEditing) toggleEditMode(true);
 }
